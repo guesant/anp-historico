@@ -2,6 +2,7 @@ package links_planilhas
 
 func ClassificarPlanilha(rawURL string) (LinkPlanilha, bool, error) {
 	nome, reconhecida := nomeRelativo(rawURL)
+
 	if !reconhecida {
 		return LinkPlanilha{}, false, nil
 	}
@@ -21,7 +22,7 @@ func ClassificarPlanilha(rawURL string) (LinkPlanilha, bool, error) {
 		return LinkPlanilha{}, true, err
 	}
 
-	intervaloAproximado, err := normalizarIntervalo(match[3])
+	referenciaIntervalo, err := normalizarIntervalo(match[3])
 	if err != nil {
 		return LinkPlanilha{}, true, err
 	}
@@ -30,6 +31,6 @@ func ClassificarPlanilha(rawURL string) (LinkPlanilha, bool, error) {
 		Tipo:                tipo,
 		Abrangencia:         abrangencia,
 		URL:                 rawURL,
-		IntervaloAproximado: intervaloAproximado,
+		ReferenciaIntervalo: referenciaIntervalo,
 	}, true, nil
 }
