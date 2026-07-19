@@ -29,6 +29,7 @@ func main() {
 
 	// fmt.Printf("%+v\n", planilha)
 	//
+
 	ctx := context.Background()
 
 	planilhas, err := links_planilhas.ExtrairLinksPlanilhas(
@@ -45,6 +46,13 @@ func main() {
 	encoder.SetEscapeHTML(false)
 
 	if err := encoder.Encode(planilhas); err != nil {
+		log.Fatal(err)
+	}
+
+	var pathPlanilhas = "./planilhas"
+	err = LerTodasAsPlanilhas(pathPlanilhas)
+
+	if err != nil {
 		log.Fatal(err)
 	}
 }
