@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/guesant/anp-historico/internal/anp"
-	"github.com/guesant/anp-historico/internal/anp/extratores"
+	"github.com/guesant/anp-historico/internal/anp/extratores/links_planilhas"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 	//
 	ctx := context.Background()
 
-	planilhas, err := extratores.ExtrairLinksPlanilhas(
+	planilhas, err := links_planilhas.ExtrairLinksPlanilhas(
 		ctx,
 		anp.PaginaSerieHistoricaURL,
 	)

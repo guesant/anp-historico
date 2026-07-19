@@ -1,5 +1,7 @@
 package anp
 
+type DateISO = string
+
 type TipoSerie string
 
 const (
@@ -16,17 +18,7 @@ const (
 	AbrangenciaMunicipios Abrangencia = "municipios"
 )
 
-type Planilha struct {
-	Tipo        TipoSerie   `json:"tipo"`
-	Abrangencia Abrangencia `json:"abrangencia"`
-	URL         string      `json:"url"`
-	De          DateISO     `json:"de"`
-	Ate         *DateISO    `json:"ate"`
-}
-
-type DateISO = string
-
-type intervalo struct {
-	de  DateISO
-	ate *DateISO
+type Intervalo struct {
+	De  DateISO
+	Ate *DateISO
 }

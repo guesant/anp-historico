@@ -18,7 +18,7 @@ func ObterLinksDaURL(ctx context.Context, paginaURL string) ([]string, error) {
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		paginaURL,
+		baseURL.String(),
 		nil,
 	)
 
@@ -50,10 +50,10 @@ func ObterLinksDaURL(ctx context.Context, paginaURL string) ([]string, error) {
 		)
 	}
 
-	links, err := ObterLinksDoHtml(response.Body)
+	links, err := ObterLinksDoHtml(response.Body, baseURL)
 
 	if err != nil {
-		return nil, fmt.Errorf("interpretar links da pagina %s", paginaURL)
+		return nil, fmt.Errorf("interpretar links da pagina %s", baseURL.String())
 	}
 
 	return links, nil

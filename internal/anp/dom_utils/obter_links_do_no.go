@@ -7,7 +7,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func ObterLinksDoNo(no *html.Node) ([]string, error) {
+func ObterLinksDoNo(no *html.Node, baseURL *url.URL) ([]string, error) {
 	var links []string
 
 	visitadas := make(map[string]struct{})
@@ -24,9 +24,19 @@ func ObterLinksDoNo(no *html.Node) ([]string, error) {
 				referencia, err := url.Parse(href)
 
 				if err == nil {
-					if _, existe := visitadas[referencia.String()]; !existe {
-						visitadas[referencia.String()] = struct{}{}
-						links = append(links, href)
+					var urlAbsoluta string
+
+					if baseURL != nil {
+						urlAbsoluta = baseURL.ResolveReference(referencia).String()
+					} else {
+						urlAbsoluta = referencia.String()
+					}
+
+					_, existe := visitadas[urlAbsoluta]
+
+					if !existe {
+						visitadas[urlAbsoluta] = struct{}{}
+						links = append(links, urlAbsoluta)
 					}
 				}
 			}
