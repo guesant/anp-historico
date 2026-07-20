@@ -5,26 +5,26 @@ import (
 	"fmt"
 	"sort"
 
-	du "github.com/guesant/anp-historico/internal/anp/dom_utils"
+	du "github.com/guesant/anp-historico/internal/html_utils"
 )
 
-func ExtrairLinksPlanilhas(
+func ExtrairLinksPlanilhasDaURL(
 	ctx context.Context,
 	paginaURL string,
 ) ([]LinkPlanilha, error) {
 	links, err := du.ObterLinksDaURL(ctx, paginaURL)
 
 	if err != nil {
-		return nil, fmt.Errorf("interpretar links da pagina %s", paginaURL)
+		return nil, fmt.Errorf("erro ao interpretar a url fornecida %q: %w", paginaURL, err)
 	}
 
 	planilhas := make([]LinkPlanilha, 0)
 
 	for _, href := range links {
-		planilha, reconhecida, err := ClassificarPlanilha(href)
+		planilha, reconhecida, err := ClassificarLinkPlanilha(href)
 
 		if err != nil {
-			return nil, fmt.Errorf("classificar %q: %w", href, err)
+			return nil, fmt.Errorf("erro ao tentar classificar uma planilha presente na página %q: %w", href, err)
 		}
 
 		if reconhecida {

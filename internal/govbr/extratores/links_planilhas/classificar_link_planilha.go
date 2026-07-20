@@ -1,6 +1,6 @@
 package links_planilhas
 
-func ClassificarPlanilha(rawURL string) (LinkPlanilha, bool, error) {
+func ClassificarLinkPlanilha(rawURL string) (LinkPlanilha, bool, error) {
 	nome, reconhecida := nomeRelativo(rawURL)
 
 	if !reconhecida {

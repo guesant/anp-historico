@@ -1,4 +1,4 @@
-package dom_utils
+package html_utils
 
 import (
 	"net/url"
@@ -16,7 +16,7 @@ func ObterLinksDoNo(no *html.Node, baseURL *url.URL) ([]string, error) {
 
 	percorrer = func(no *html.Node) error {
 		if no.Type == html.ElementNode && no.Data == "a" {
-			href, encontrada := ObterAtributo(no, "href")
+			href, encontrada := ObterAtributoDoNo(no, "href")
 
 			if encontrada {
 				href = strings.TrimSpace(href)

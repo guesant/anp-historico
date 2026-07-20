@@ -6,10 +6,9 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 
-	"github.com/guesant/anp-historico/internal/anp"
-	dd "github.com/guesant/anp-historico/internal/anp/detector"
+	dd "github.com/guesant/anp-historico/internal/anp/planilha"
+	"github.com/guesant/anp-historico/internal/anp/planilha/tabela"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -17,7 +16,7 @@ func ListarPlanilhas(pathPlanilhas string) ([]string, error) {
 	dir, err := os.ReadDir(pathPlanilhas)
 
 	if err != nil {
-		return nil, fmt.Errorf("error reading planilhas: %v", err)
+		return nil, fmt.Errorf("error reading planilha: %v", err)
 	}
 
 	var arquivos []string
@@ -31,33 +30,6 @@ func ListarPlanilhas(pathPlanilhas string) ([]string, error) {
 	}
 
 	return arquivos, nil
-}
-
-type Registro struct {
-	DataInicial *time.Time
-	DataFinal   *time.Time
-	Mes         *time.Time
-
-	Produto   string
-	Regiao    string
-	Estado    string
-	Municipio string
-
-	PostosPesquisados int
-	UnidadeMedida     string
-
-	PrecoMedioRevenda  *float64
-	DesvioRevenda      *float64
-	PrecoMinimoRevenda *float64
-	PrecoMaximoRevenda *float64
-}
-
-type Parser interface {
-	ProcessarLinha(numero int, linha []string) (Registro, error)
-}
-
-func NewParser(formato anp.Formato) (*Parser, error) {
-	return nil, nil
 }
 
 func LerPlanilha(arquivo string) error {
@@ -85,40 +57,40 @@ func LerPlanilha(arquivo string) error {
 		defer rows.Close()
 
 		detector := dd.NewDetector()
-		var parser Parser
+		var parser *tabela.Parser
 
 		indiceFisico, indiceVirtual, limite := 0, 0, 100
 
 		for rows.Next() {
 			indiceFisico++
 
-			linha, err := rows.Columns()
+			colunas, err := rows.Columns()
 
 			if err != nil {
 				return fmt.Errorf("error getting columns: %v", err)
 			}
 
-			if len(linha) == 0 {
+			if len(colunas) == 0 {
 				continue
 			}
 
 			if parser == nil {
-				detector.AnalisarLinha(indiceFisico, linha)
+				detector.AnalisarLinha(indiceFisico, colunas)
 
 				if detector.Confirmado() {
-					formato, err := detector.Formato()
+					_, err := detector.Formato()
 
 					if err != nil {
 						return fmt.Errorf("error getting formato: %v", err)
 					}
 
-					parser, err := NewParser(formato)
+					parser, err = tabela.NewParser(colunas)
 
 					if err != nil {
 						return fmt.Errorf("error creating parser: %v", err)
 					}
 
-					break
+					continue
 				}
 
 				indiceVirtual++
@@ -130,7 +102,7 @@ func LerPlanilha(arquivo string) error {
 				continue
 			}
 
-			registro, err := parser.ProcessarLinha(indiceFisico, linha)
+			registro, err := parser.ProcessarLinha(indiceFisico, colunas)
 
 			if err != nil {
 				return err
@@ -140,7 +112,7 @@ func LerPlanilha(arquivo string) error {
 		}
 
 		if detector.Confirmado() {
-			fmt.Println("detectou")
+			fmt.Println("boa")
 		} else {
 			fmt.Println("vish")
 		}
@@ -158,7 +130,7 @@ func LerTodasAsPlanilhas(pathPlanilhas string) error {
 	arquivos, err := ListarPlanilhas(pathPlanilhas)
 
 	if err != nil {
-		return fmt.Errorf("error listar planilhas: %v", err)
+		return fmt.Errorf("error listar planilha: %v", err)
 	}
 
 	considerado := arquivos

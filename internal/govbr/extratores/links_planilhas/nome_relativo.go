@@ -5,13 +5,13 @@ import (
 	"path"
 	"strings"
 
-	"github.com/guesant/anp-historico/internal/anp"
+	"github.com/guesant/anp-historico/internal/govbr"
 )
 
 func nomeRelativo(
 	rawURL string,
 ) (string, bool) {
-	if !strings.HasPrefix(rawURL, anp.BasePlanilhasURL) {
+	if !strings.HasPrefix(rawURL, govbr.BasePlanilhasURL) {
 		return "", false
 	}
 

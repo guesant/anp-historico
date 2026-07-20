@@ -1,4 +1,4 @@
-package dom_utils
+package html_utils
 
 import (
 	"fmt"
