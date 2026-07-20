@@ -6,7 +6,10 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
+	"github.com/guesant/anp-historico/internal/anp"
+	dd "github.com/guesant/anp-historico/internal/anp/detector"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -30,6 +33,33 @@ func ListarPlanilhas(pathPlanilhas string) ([]string, error) {
 	return arquivos, nil
 }
 
+type Registro struct {
+	DataInicial *time.Time
+	DataFinal   *time.Time
+	Mes         *time.Time
+
+	Produto   string
+	Regiao    string
+	Estado    string
+	Municipio string
+
+	PostosPesquisados int
+	UnidadeMedida     string
+
+	PrecoMedioRevenda  *float64
+	DesvioRevenda      *float64
+	PrecoMinimoRevenda *float64
+	PrecoMaximoRevenda *float64
+}
+
+type Parser interface {
+	ProcessarLinha(numero int, linha []string) (Registro, error)
+}
+
+func NewParser(formato anp.Formato) (*Parser, error) {
+	return nil, nil
+}
+
 func LerPlanilha(arquivo string) error {
 	f, err := excelize.OpenFile(arquivo)
 
@@ -46,51 +76,78 @@ func LerPlanilha(arquivo string) error {
 	sheets := f.GetSheetList()
 
 	for _, sheet := range sheets {
+		rows, err := f.Rows(sheet)
 
-		//panes, err := f.GetPanes(sheet)
-		//
-		//if err != nil {
-		//	return fmt.Errorf("error getting panes: %v", err)
-		//}
-		//
-		//if !panes.Freeze || panes.YSplit == 0 {
-		//	return fmt.Errorf("não existem linhas congeladas")
-		//}
-		//
-		//fmt.Printf("arquivo %s freeze %v", arquivo, panes.YSplit)
+		if err != nil {
+			return fmt.Errorf("error getting rows: %v", err)
+		}
 
-		//rows, err := f.Rows(sheet)
-		//
-		//if err != nil {
-		//	return fmt.Errorf("error getting rows: %v", err)
-		//}
-		//
-		//curr, limit := 0, 20
-		//
-		//
-		//for rows.Next() {
-		//	row, err := rows.Columns()
-		//
-		//	if err != nil {
-		//		return fmt.Errorf("error getting columns: %v", err)
-		//	}
-		//
-		//	if len(row) == 0 {
-		//		continue
-		//	}
-		//
-		//	curr++
-		//
-		//	if curr > limit {
-		//		break
-		//	}
-		//
-		//	fmt.Println(row)
-		//}
-		//
-		//if err = rows.Close(); err != nil {
-		//	return fmt.Errorf("error closing rows: %v", err)
-		//}
+		defer rows.Close()
+
+		detector := dd.NewDetector()
+		var parser Parser
+
+		indiceFisico, indiceVirtual, limite := 0, 0, 100
+
+		for rows.Next() {
+			indiceFisico++
+
+			linha, err := rows.Columns()
+
+			if err != nil {
+				return fmt.Errorf("error getting columns: %v", err)
+			}
+
+			if len(linha) == 0 {
+				continue
+			}
+
+			if parser == nil {
+				detector.AnalisarLinha(indiceFisico, linha)
+
+				if detector.Confirmado() {
+					formato, err := detector.Formato()
+
+					if err != nil {
+						return fmt.Errorf("error getting formato: %v", err)
+					}
+
+					parser, err := NewParser(formato)
+
+					if err != nil {
+						return fmt.Errorf("error creating parser: %v", err)
+					}
+
+					break
+				}
+
+				indiceVirtual++
+
+				if indiceVirtual >= limite {
+					break
+				}
+
+				continue
+			}
+
+			registro, err := parser.ProcessarLinha(indiceFisico, linha)
+
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("%+v\n", registro)
+		}
+
+		if detector.Confirmado() {
+			fmt.Println("detectou")
+		} else {
+			fmt.Println("vish")
+		}
+
+		if err = rows.Close(); err != nil {
+			return fmt.Errorf("error closing rows: %v", err)
+		}
 
 	}
 
@@ -112,16 +169,11 @@ func LerTodasAsPlanilhas(pathPlanilhas string) error {
 			continue
 		}
 
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-
 		err := LerPlanilha(arquivo)
 
 		if err != nil {
 			return fmt.Errorf("error de ler planilha:  %v %v", arquivo, err)
 		}
-
 	}
 
 	return nil

@@ -18,7 +18,9 @@ const (
 	AbrangenciaMunicipios Abrangencia = "municipios"
 )
 
-type Intervalo struct {
-	De  DateISO
-	Ate *DateISO
+type Formato struct {
+	TipoSerie   TipoSerie   `json:"serie"`
+	Abrangencia Abrangencia `json:"brasil"`
+
+	IndiceFisicoCabecalho int `json:"indice_fisico_cabecalho"`
 }
