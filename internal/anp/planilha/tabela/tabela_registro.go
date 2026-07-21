@@ -5,7 +5,7 @@ import "time"
 type TabelaRegistro struct {
 	Mes                        *time.Time
 	Produto                    string
-	PostosPesquisados          int
+	PostosPesquisados          *int
 	UnidadeMedida              string
 	PrecoMedioRevenda          *float64
 	DesvioPadraoRevenda        *float64

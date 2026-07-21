@@ -2,53 +2,150 @@ package tabela
 
 import (
 	"fmt"
-	"time"
-
-	"github.com/guesant/anp-historico/internal"
 )
 
 type Parser struct {
-	ColunasNormalizadas []string
+	ColunasNormalizadas []ColunaTabela
 }
 
 func NewParser(colunas []string) (*Parser, error) {
-	colunasNormalizadas := make([]string, 0)
+	colunasNormalizadas := make([]ColunaTabela, 0, len(colunas))
 
-	for _, coluna := range colunas {
-		colunaNormalizada := internal.NormalizarTextoGenerico(coluna)
+	for indice, coluna := range colunas {
+		colunaNormalizada, err := NormalizarColuna(coluna)
+
+		if err != nil {
+			return nil, fmt.Errorf("erro na coluna %d do cabeçalho: %w", indice+1, err)
+		}
+
 		colunasNormalizadas = append(colunasNormalizadas, colunaNormalizada)
 	}
 
-	parser := Parser{}
-
-	parser.ColunasNormalizadas = colunasNormalizadas
-
-	return &parser, nil
+	return &Parser{
+		ColunasNormalizadas: colunasNormalizadas,
+	}, nil
 }
 
 func (p *Parser) ProcessarLinha(numero int, linha []string) (TabelaRegistro, error) {
-
 	registro := TabelaRegistro{}
 
 	for indice, colunaNormalizada := range p.ColunasNormalizadas {
-		valor := linha[indice]
+		valor := ""
 
-		valor = internal.NormalizarTextoGenerico(valor)
-
-		if valor == "-" {
-			valor = ""
+		if indice < len(linha) {
+			valor = normalizarValor(linha[indice])
 		}
 
+		var err error
+
 		switch colunaNormalizada {
-		case string(ColunaTabelaMes):
+
+		case ColunaTabelaMes:
 			{
-				registro.Mes = &time.Time{}
+				registro.Mes, err = converterMes(valor)
+			}
+		case ColunaTabelaProduto:
+			{
+				registro.Produto = valor
+			}
+		case ColunaNumeroPostosPesquisados:
+			{
+				registro.PostosPesquisados, err = converterInteiro(valor)
+			}
+		case ColunaUnidadeDeMedida:
+			{
+				registro.UnidadeMedida = valor
+			}
+		case ColunaPrecoMedioRevenda:
+			{
+				registro.PrecoMedioRevenda, err = converterFloatOpcional(valor)
+			}
+		case ColunaDesvioPadraoRevenda:
+			{
+				registro.DesvioPadraoRevenda, err = converterFloatOpcional(valor)
+
+			}
+		case ColunaPrecoMinimoRevenda:
+			{
+				registro.PrecoMinimoRevenda, err = converterFloatOpcional(valor)
+
+			}
+		case ColunaPrecoMaximoRevenda:
+			{
+				registro.PrecoMaximoRevenda, err = converterFloatOpcional(valor)
+			}
+		case ColunaMargemMediaRevenda:
+			{
+				registro.MargemMediaRevenda, err = converterFloatOpcional(valor)
+			}
+		case ColunaCoeficienteVariacaoRevenda:
+			{
+				registro.CoeficienteVariacaoRevenda, err = converterFloatOpcional(valor)
+
+			}
+		case ColunaPrecoMedioDistribuicao:
+			{
+				registro.PrecoMedioDistribuicao, err = converterFloatOpcional(valor)
+
+			}
+		case ColunaDesvioPadraoDistribuicao:
+			{
+				registro.DesvioPadraoDistribuicao, err = converterFloatOpcional(valor)
+
+			}
+		case ColunaPrecoMinimoDistribuicao:
+			{
+				registro.PrecoMinimoDistribuicao, err = converterFloatOpcional(valor)
+
+			}
+		case ColunaPrecoMaximoDistribuicao:
+			{
+				registro.PrecoMaximoDistribuicao, err = converterFloatOpcional(valor)
+			}
+		case ColunaCoeficienteVariacaoDistribuicao:
+			{
+				registro.CoeficienteVariacaoDistribuicao, err = converterFloatOpcional(valor)
+			}
+		case ColunaRegiao:
+			{
+				registro.Regiao = valor
+			}
+		case ColunaEstado:
+			{
+				registro.Estado = valor
+			}
+		case ColunaMunicipio:
+			{
+				registro.Municipio = valor
+			}
+		case ColunaDataInicial:
+			{
+				registro.DataInicial, err = converterDataOpcional(valor)
+			}
+		case ColunaDataFinal:
+			{
+				registro.DataFinal, err = converterDataOpcional(valor)
 			}
 
 		default:
 			{
-				fmt.Printf("processamento não implementado: %d %s %s \n", indice, colunaNormalizada, valor)
+				return TabelaRegistro{}, fmt.Errorf(
+					"linha %d: coluna não reconhecida: original=%q normalizada=%q",
+					numero,
+					p.ColunasNormalizadas[indice],
+					colunaNormalizada,
+				)
 			}
+		}
+
+		if err != nil {
+			return TabelaRegistro{}, fmt.Errorf(
+				"linha %d, coluna %q, valor %q: %w",
+				numero,
+				colunaNormalizada,
+				valor,
+				err,
+			)
 		}
 
 	}
