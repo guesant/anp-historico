@@ -6,9 +6,10 @@ import (
 
 type Parser struct {
 	ColunasNormalizadas []ColunaTabela
+	UsarSistema1904     bool
 }
 
-func NewParser(colunas []string) (*Parser, error) {
+func NewParser(colunas []string, usarSistema1904 bool) (*Parser, error) {
 	colunasNormalizadas := make([]ColunaTabela, 0, len(colunas))
 
 	for indice, coluna := range colunas {
@@ -23,6 +24,7 @@ func NewParser(colunas []string) (*Parser, error) {
 
 	return &Parser{
 		ColunasNormalizadas: colunasNormalizadas,
+		UsarSistema1904:     usarSistema1904,
 	}, nil
 }
 
@@ -42,7 +44,7 @@ func (p *Parser) ProcessarLinha(numero int, linha []string) (TabelaRegistro, err
 
 		case ColunaTabelaMes:
 			{
-				registro.Mes, err = converterMes(valor)
+				registro.Mes, err = converterMes(valor, p.UsarSistema1904)
 			}
 		case ColunaTabelaProduto:
 			{
@@ -120,11 +122,11 @@ func (p *Parser) ProcessarLinha(numero int, linha []string) (TabelaRegistro, err
 			}
 		case ColunaDataInicial:
 			{
-				registro.DataInicial, err = converterDataOpcional(valor)
+				registro.DataInicial, err = converterDataOpcional(valor, p.UsarSistema1904)
 			}
 		case ColunaDataFinal:
 			{
-				registro.DataFinal, err = converterDataOpcional(valor)
+				registro.DataFinal, err = converterDataOpcional(valor, p.UsarSistema1904)
 			}
 
 		default:

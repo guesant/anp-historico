@@ -45,6 +45,14 @@ func LerPlanilha(arquivo string) error {
 		}
 	}()
 
+	propsPasta, err := f.GetWorkbookProps()
+
+	if err != nil {
+		return fmt.Errorf("error getting workbook props: %v", err)
+	}
+
+	usarSistema1904 := propsPasta.Date1904 != nil && *propsPasta.Date1904
+
 	sheets := f.GetSheetList()
 
 	for _, sheet := range sheets {
@@ -64,7 +72,7 @@ func LerPlanilha(arquivo string) error {
 		for rows.Next() {
 			indiceFisico++
 
-			colunas, err := rows.Columns()
+			colunas, err := rows.Columns(excelize.Options{RawCellValue: true})
 
 			if err != nil {
 				return fmt.Errorf("error getting columns: %v", err)
@@ -84,7 +92,7 @@ func LerPlanilha(arquivo string) error {
 						return fmt.Errorf("error getting formato: %v", err)
 					}
 
-					parser, err = tabela.NewParser(colunas)
+					parser, err = tabela.NewParser(colunas, usarSistema1904)
 
 					if err != nil {
 						return fmt.Errorf("error creating parser: %v", err)

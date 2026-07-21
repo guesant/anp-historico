@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/guesant/anp-historico/internal"
+	"github.com/xuri/excelize/v2"
 )
 
 type ColunaTabela string
@@ -158,9 +159,19 @@ func normalizarValor(valor string) string {
 	}
 }
 
-func converterMes(valor string) (*time.Time, error) {
+func converterMes(valor string, usarSistema1904 bool) (*time.Time, error) {
 	if valor == "" {
 		return nil, nil
+	}
+
+	if serial, err := strconv.ParseFloat(valor, 64); err == nil {
+		data, err := excelize.ExcelDateToTime(serial, usarSistema1904)
+
+		if err != nil {
+			return nil, fmt.Errorf("converter serial de mês do Excel %q: %w", valor, err)
+		}
+
+		return &data, nil
 	}
 
 	formatos := []string{
@@ -217,17 +228,44 @@ func converterFloatOpcional(valor string) (*float64, error) {
 	return &valorFloat, nil
 }
 
-func converterDataOpcional(valor string) (*time.Time, error) {
+func converterDataOpcional(valor string, usarSistema1904 bool) (*time.Time, error) {
 	if valor == "" {
 		return nil, nil
 	}
 
+	if serial, err := strconv.ParseFloat(valor, 64); err == nil {
+		data, err := excelize.ExcelDateToTime(serial, usarSistema1904)
+
+		if err != nil {
+			return nil, fmt.Errorf("converter serial de data do Excel %q: %w", valor, err)
+		}
+
+		return &data, nil
+	}
+
 	formatos := []string{
-		"02/01/2006",
-		"02/01/06",
-		"2006-01-02",
-		"02.01.2006",
-		"02-01-06",
+		//// Dia/mês/ano com quatro dígitos
+		//"02/01/2006",
+		//"2/1/2006",
+		//
+		//// Dia/mês/ano com dois dígitos
+		//"02/01/06",
+		//"2/1/06",
+		//
+		//// ISO
+		//"2006-01-02",
+		//
+		//// Separador por ponto
+		//"02.01.2006",
+		//"2.1.2006",
+		//
+		//// Separador por hífen
+		//"02-01-2006",
+		//"2-1-2006",
+		//"02-01-06",
+		//"2-1-06",
+		//
+		//"01-02-06",
 	}
 
 	for _, formato := range formatos {
