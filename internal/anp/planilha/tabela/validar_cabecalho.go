@@ -1,11 +1,11 @@
 package tabela
 
 import (
-	"github.com/guesant/anp-historico/internal"
+	"github.com/guesant/anp-historico/internal/normalizar"
 )
 
 func ValidarCabecalho(linha []string) bool {
-	texto := internal.NormalizarLinhaGenerica(linha)
+	texto := normalizar.Linha(linha)
 
 	temProduto := ContemColuna(ColunaTabelaProduto, texto)
 	temPostos := ContemColuna(ColunaNumeroPostosPesquisados, texto)

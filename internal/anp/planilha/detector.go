@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/guesant/anp-historico/internal"
 	"github.com/guesant/anp-historico/internal/anp/planilha/tabela"
+	"github.com/guesant/anp-historico/internal/normalizar"
 )
 
 type Detector struct {
@@ -22,7 +22,7 @@ func NewDetector() *Detector {
 }
 
 func (d *Detector) AnalisarLinha(indiceFisicoLinha int, linha []string) {
-	texto := internal.NormalizarLinhaGenerica(linha)
+	texto := normalizar.Linha(linha)
 
 	switch {
 	case strings.Contains(texto, "INTERVALO DE TEMPO: MENSAL"):

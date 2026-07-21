@@ -1,4 +1,4 @@
-package internal
+package normalizar
 
 import (
 	"strings"
@@ -7,7 +7,21 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func NormalizarTextoGenerico(valor string) string {
+func Linha(linhas []string) string {
+	partes := make([]string, 0, len(linhas))
+
+	for _, coluna := range linhas {
+		coluna := Texto(coluna)
+
+		if coluna != "" {
+			partes = append(partes, coluna)
+		}
+	}
+
+	return strings.Join(partes, " ")
+}
+
+func Texto(valor string) string {
 	valor = strings.TrimSpace(valor)
 	valor = strings.ToUpper(valor)
 

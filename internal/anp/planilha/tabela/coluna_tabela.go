@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/guesant/anp-historico/internal"
+	"github.com/guesant/anp-historico/internal/normalizar"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -40,7 +40,7 @@ func ContemColuna(colunaAlvo ColunaTabela, busca string) bool {
 }
 
 func NormalizarColuna(coluna string) (ColunaTabela, error) {
-	textoNormaliado := internal.NormalizarTextoGenerico(coluna)
+	textoNormaliado := normalizar.Texto(coluna)
 
 	colunaNormalizada := ColunaTabela(textoNormaliado)
 

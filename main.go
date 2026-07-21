@@ -8,6 +8,7 @@ import (
 
 	"github.com/guesant/anp-historico/internal/govbr"
 	"github.com/guesant/anp-historico/internal/govbr/extratores/links_planilhas"
+	"github.com/guesant/anp-historico/internal/leitor"
 )
 
 func main() {
@@ -50,7 +51,7 @@ func main() {
 	}
 
 	var pathPlanilhas = "./planilhas"
-	err = LerTodasAsPlanilhas(pathPlanilhas)
+	err = leitor.TodasAsPlanilhas(pathPlanilhas)
 
 	if err != nil {
 		log.Fatal(err)
