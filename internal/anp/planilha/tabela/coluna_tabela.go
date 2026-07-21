@@ -227,6 +227,7 @@ func converterDataOpcional(valor string) (*time.Time, error) {
 		"02/01/06",
 		"2006-01-02",
 		"02.01.2006",
+		"02-01-06",
 	}
 
 	for _, formato := range formatos {
